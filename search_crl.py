@@ -24,21 +24,20 @@ for chunk in response.iter_content(chunk_size=1024):
 progress_bar.close()
 response.close()
 
-
+crl = load_crl(FILETYPE_ASN1, crl_data)
+revoked= crl.get_revoked()
 
 def search_crl():
-
-    crl = load_crl(FILETYPE_ASN1, crl_data)
 
     # Convert target serial number to bytes
     target_serial_number = entry.get().lower().encode()
 
     # Search for certificate by serial number
-    for r in crl.get_revoked():
+    for r in revoked:
         if r.get_serial().lower() == target_serial_number:
             serial_number = r.get_serial().decode()
             revocation_date = r.get_rev_date().decode()
-            reason = r.get_reason().decode()
+            reason = r.get_reason()
             revocation_datetime = datetime.datetime.strptime(revocation_date, '%Y%m%d%H%M%SZ')
             formatted_datetime = revocation_datetime.strftime('%B %dth, %Y at %H:%M:%S UTC')
             result_label.config(text=f"Serial number: {serial_number}\nRevocation date: {formatted_datetime}\nReason: {reason}")
